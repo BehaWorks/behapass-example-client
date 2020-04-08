@@ -3,10 +3,17 @@ using System.Collections.Generic;
 using System.Net;
 using LoggerServer;
 using LoggerServer.Models;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public sealed class LoginLogger : MonoBehaviourWithPrint
 {
+    public Canvas menuHolder;
+    public TextMeshProUGUI messageHolder;
+    public Button continueButton;
+
     private ControllerLogger _rightController;
     private ControllerLogger _leftController;
 
@@ -61,7 +68,7 @@ public sealed class LoginLogger : MonoBehaviourWithPrint
                     HttpStatusCode.NotFound,
                     () =>
                     {
-                        Print("User not found.");
+                        ShowMenu("User not found.", false);
                         return false;
                     }
                 }
@@ -73,6 +80,28 @@ public sealed class LoginLogger : MonoBehaviourWithPrint
             return;
         }
 
-        Print($"Welcome user with ID {response.UserId}.");
+        ShowMenu($"Welcome user with ID {response.UserId}.", true);
+    }
+
+    private void ShowMenu(string message, bool success)
+    {
+        menuHolder.gameObject.SetActive(true);
+        messageHolder.text = message;
+        continueButton.gameObject.SetActive(success);
+    }
+
+    public void Repeat()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void RegistrationScene()
+    {
+        SceneManager.LoadScene("Registration Keyboard");
+    }
+
+    public void Continue()
+    {
+        Print("Not implemented yet!"); // TODO
     }
 }
