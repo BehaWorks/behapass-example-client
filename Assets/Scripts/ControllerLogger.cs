@@ -31,7 +31,7 @@ internal sealed class ControllerLogger
         {
             if (_session == null)
             {
-                _session = new Session();
+                _session = new Session(!string.IsNullOrEmpty(_userId));
             }
 
             var timeStamp = _session.GetTimeStamp;

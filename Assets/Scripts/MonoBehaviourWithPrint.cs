@@ -8,7 +8,7 @@ public abstract class MonoBehaviourWithPrint : MonoBehaviour
     private string _guiText;
     private Color _guiColor;
 
-    protected virtual string LogPrefix
+    private string LogPrefix
     {
         get { return gameObject.name; }
     }

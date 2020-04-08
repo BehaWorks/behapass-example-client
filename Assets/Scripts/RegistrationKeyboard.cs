@@ -1,13 +1,24 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using System.Net;
 using LoggerServer;
 using LoggerServer.Models;
 using UnityEngine.SceneManagement;
 using VRKeys;
 
-public class RegistrationKeyboard : MonoBehaviour
+public sealed class RegistrationKeyboard : MonoBehaviour
 {
     public Keyboard keyboard;
+
+    private GameObject _player;
+
+    private void Awake()
+    {
+        _player = GameObject.FindWithTag("Player");
+        _player.SetActive(false);
+    }
 
     private void Update()
     {
@@ -61,12 +72,12 @@ public class RegistrationKeyboard : MonoBehaviour
         keyboard.Disable();
     }
 
-    public void HandleUpdate(string text)
+    private void HandleUpdate(string text)
     {
         keyboard.HideValidationMessage();
     }
 
-    public void HandleSubmit(string userName)
+    private void HandleSubmit(string userName)
     {
         keyboard.DisableInput();
 
@@ -82,11 +93,18 @@ public class RegistrationKeyboard : MonoBehaviour
 
     private IEnumerator SubmitUserName(string userName)
     {
-        var response = LoggerServerAPI.PostUser(new UserRequestModel { UserName = userName },
-            code =>
+        var response = LoggerServerAPI.PostUser(
+            new UserRequestModel { UserName = userName },
+            new Dictionary<HttpStatusCode, Func<bool>>
             {
-                keyboard.ShowInfoMessage($"Server returned: {code}");
-                return true;
+                {
+                    HttpStatusCode.OK,
+                    () =>
+                    {
+                        keyboard.ShowSuccessMessage("Successfully sent.");
+                        return true;
+                    }
+                }
             },
             exception => keyboard.ShowValidationMessage(exception.Message));
 
@@ -104,5 +122,6 @@ public class RegistrationKeyboard : MonoBehaviour
         yield return new WaitForSeconds(2f);
 
         SceneManager.LoadScene("Registration Logger");
+        _player.SetActive(true);
     }
 }

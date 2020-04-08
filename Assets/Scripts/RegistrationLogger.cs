@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using LoggerServer;
 using LoggerServer.Models;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class RegistrationLogger : MonoBehaviourWithPrint
+public sealed class RegistrationLogger : MonoBehaviourWithPrint
 {
     public double shortestGestureMiliseconds = 200;
 
@@ -37,6 +39,8 @@ public class RegistrationLogger : MonoBehaviourWithPrint
     private bool LoadLoggers()
     {
         var config = FindObjectOfType<RegistrationConfig>();
+
+        SceneManager.MoveGameObjectToScene(config.gameObject, SceneManager.GetActiveScene());
 
         _userName = config?.userName;
         _userId = config?.userId;
@@ -80,24 +84,19 @@ public class RegistrationLogger : MonoBehaviourWithPrint
         var response = LoggerServerAPI.PostUserMovements(
             _userId,
             gestureToSend,
-            code =>
+            new Dictionary<HttpStatusCode, Func<bool>>
             {
-                switch (code)
                 {
-                    case HttpStatusCode.Accepted:
-                        {
-                            return true;
-                        }
-                    case HttpStatusCode.OK:
-                        {
-                            _finished = true;
-                            return true;
-                        }
-                    default:
-                        {
-                            Print($"Server returned: {code}");
-                            return false;
-                        }
+                    HttpStatusCode.Accepted,
+                    () => true
+                },
+                {
+                    HttpStatusCode.OK,
+                    () =>
+                    {
+                        _finished = true;
+                        return true;
+                    }
                 }
             },
             exception => Print(exception.Message, LogType.Error));
