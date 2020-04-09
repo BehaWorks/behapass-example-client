@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CameraController : MonoBehaviourWithPrint
+public sealed class CameraController : MonoBehaviourWithPrint
 {
     public float moveSensitivity = 0.02f;
     public float rotateSensitivity = 3;

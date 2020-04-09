@@ -7,7 +7,7 @@ using Valve.Newtonsoft.Json;
 
 namespace LoggerServer
 {
-    public static class LoggerServerAPI
+    internal static class LoggerServerAPI
     {
         private const string Url = "http://team12-19.studenti.fiit.stuba.sk/api/logger/";
 
@@ -15,47 +15,55 @@ namespace LoggerServer
 
         public static UserResponseModel PostUser(
             UserRequestModel userRequest,
-            Func<HttpStatusCode, bool> statusHandler = null,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
             Action<Exception> exceptionHandler = null)
         {
-            return Post<UserResponseModel>("user", userRequest, statusHandler, exceptionHandler);
+            return Post<UserResponseModel>("user", userRequest, statusCodeHandlers, exceptionHandler);
         }
 
         public static UserMovementsResponseModel PostUserMovements(
             string userId,
             IList<MovementModel> movements,
-            Func<HttpStatusCode, bool> statusHandler = null,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
             Action<Exception> exceptionHandler = null)
         {
-            return Post<UserMovementsResponseModel>($"{userId}/movements", movements);
+            return Post<UserMovementsResponseModel>($"{userId}/movements", movements, statusCodeHandlers, exceptionHandler);
+        }
+
+        public static LookupModel Lookup(
+            IList<MovementModel> movements,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
+            Action<Exception> exceptionHandler = null)
+        {
+            return Post<LookupModel>("lookup", movements, statusCodeHandlers, exceptionHandler);
         }
 
         private static TResponseData Get<TResponseData>(
             string requestUrl,
-            Func<HttpStatusCode, bool> statusHandler = null,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
             Action<Exception> exceptionHandler = null)
             where TResponseData : class, new()
         {
             var request = new RestRequest(requestUrl, Method.GET, DataFormat.Json);
-            return Execute<TResponseData>(request, statusHandler, exceptionHandler);
+            return Execute<TResponseData>(request, statusCodeHandlers, exceptionHandler);
         }
 
         private static TResponseData Post<TResponseData>(
             string requestUrl,
             object requestBody,
-            Func<HttpStatusCode, bool> statusHandler = null,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
             Action<Exception> exceptionHandler = null)
             where TResponseData : class, new()
         {
             var request = new RestRequest(requestUrl, Method.POST, DataFormat.Json);
             var json = JsonConvert.SerializeObject(requestBody);
             request.AddParameter("application/json", json, ParameterType.RequestBody);
-            return Execute<TResponseData>(request, statusHandler, exceptionHandler);
+            return Execute<TResponseData>(request, statusCodeHandlers, exceptionHandler);
         }
 
         private static TResponseData Execute<TResponseData>(
-            RestRequest request,
-            Func<HttpStatusCode, bool> statusHandler = null,
+            IRestRequest request,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
             Action<Exception> exceptionHandler = null)
             where TResponseData : class, new()
         {
@@ -63,8 +71,17 @@ namespace LoggerServer
             {
                 var response = _server.Execute<string>(request);
 
-                var success = statusHandler?.Invoke(response.StatusCode);
+                if (statusCodeHandlers == null)
+                {
+                    return JsonConvert.DeserializeObject<TResponseData>(response.Data);
+                }
 
+                if (!statusCodeHandlers.ContainsKey(response.StatusCode))
+                {
+                    throw new Exception($"Unhandled response status code {response.StatusCode}");
+                }
+
+                var success = statusCodeHandlers[response.StatusCode]();
                 return success == false ? null : JsonConvert.DeserializeObject<TResponseData>(response.Data);
             }
             catch (Exception e)

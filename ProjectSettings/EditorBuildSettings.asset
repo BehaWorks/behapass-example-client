@@ -6,9 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Main Menu.unity
+    guid: aa93556e1fcd8a641be4a4777894c008
+  - enabled: 1
     path: Assets/Scenes/Registration Keyboard.unity
     guid: b6e625c60b4a44240a33e043a5f9ec29
   - enabled: 1
     path: Assets/Scenes/Registration Logger.unity
     guid: 207ee5aab10440f49a2002ac52c8d69e
+  - enabled: 1
+    path: Assets/Scenes/Login Logger.unity
+    guid: 46492f058cef40f41a5483690b3294c9
   m_configObjects: {}

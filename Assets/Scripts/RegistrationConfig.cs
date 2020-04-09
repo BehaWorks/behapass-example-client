@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class RegistrationConfig : MonoBehaviour
+public sealed class RegistrationConfig : MonoBehaviour
 {
     public string userName;
     public string userId;
