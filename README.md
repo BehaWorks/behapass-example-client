@@ -13,4 +13,4 @@ Odporúčaná verzia Unity3D je **2019.3.2**, odkaz na **stiahnutie**:
 
 1. Stiahnite si tento repozitár.
 2. Otvorte celý stiahnutý priečinok v Unity3D.
-3. V záložke **Project** v pričinku **Scenes** otvorte scénu **Main Menu.unity**.
+3. V záložke **Project** v priečinku **Scenes** otvorte scénu **Main Menu.unity**.
