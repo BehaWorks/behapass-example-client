@@ -24,7 +24,7 @@ public sealed class MainMenu : MonoBehaviour
 
     public void LoginScene()
     {
-        SceneManager.LoadScene("Login Logger");
+        SceneManager.LoadScene("Login Simulation");
     }
 
     public void RegistrationScene()
