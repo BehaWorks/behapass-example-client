@@ -75,7 +75,7 @@ public class LoginSimulation : MonoBehaviourWithPrint
             }
         }
 
-        if (_simulating && (_movements == null || _movementIndex == _movements.Count - 1))
+        if (_simulating && (_movements == null || _movementIndex >= _movements.Count - 2))
         {
             Destroy(_holder);
             ShowMenu($"Welcome {currentUserName}.");
