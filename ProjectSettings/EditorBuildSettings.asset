@@ -17,4 +17,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Login Logger.unity
     guid: 46492f058cef40f41a5483690b3294c9
+  - enabled: 1
+    path: Assets/Scenes/Login Simulation.unity
+    guid: 41abfe1121fd591419e10cf7c9e86714
   m_configObjects: {}

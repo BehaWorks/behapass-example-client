@@ -21,13 +21,21 @@ namespace LoggerServer
             return Post<UserResponseModel>("user", userRequest, statusCodeHandlers, exceptionHandler);
         }
 
+        public static List<MovementModel> GetUserMovements(
+            string userId,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
+            Action<Exception> exceptionHandler = null)
+        {
+            return Get<List<MovementModel>>($"user/{userId}/movements", statusCodeHandlers, exceptionHandler);
+        }
+
         public static UserMovementsResponseModel PostUserMovements(
             string userId,
             IList<MovementModel> movements,
             IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
             Action<Exception> exceptionHandler = null)
         {
-            return Post<UserMovementsResponseModel>($"{userId}/movements", movements, statusCodeHandlers, exceptionHandler);
+            return Post<UserMovementsResponseModel>($"user/{userId}/movements", movements, statusCodeHandlers, exceptionHandler);
         }
 
         public static LookupModel Lookup(

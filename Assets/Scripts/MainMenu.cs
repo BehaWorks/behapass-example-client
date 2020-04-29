@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public sealed class MainMenu : MonoBehaviour
 {
+    public Toggle simulatedToggle;
+
     private void Start()
     {
         var player = GameObject.FindWithTag("Player");
@@ -24,7 +27,12 @@ public sealed class MainMenu : MonoBehaviour
 
     public void LoginScene()
     {
-        SceneManager.LoadScene("Login Logger");
+        if (!simulatedToggle)
+        {
+            throw new UnityException("Missing link to toggle!");
+        }
+
+        SceneManager.LoadScene(simulatedToggle.isOn ? "Login Simulation" : "Login Logger");
     }
 
     public void RegistrationScene()
