@@ -45,7 +45,6 @@ internal class UserGestures
         if (movements != null)
         {
             return movements
-                .Where(movement => movement.DeviceId == "controller-1")
                 .GroupBy(movement => movement.SessionId)
                 .Select(group => group.ToList())
                 .OrderBy(gesture => Random.Range(0f, 1f))

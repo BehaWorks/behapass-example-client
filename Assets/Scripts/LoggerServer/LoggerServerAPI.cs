@@ -39,11 +39,11 @@ namespace LoggerServer
         }
 
         public static LookupModel Lookup(
-            IList<MovementModel> movements,
+            LoggerModel model,
             IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
             Action<Exception> exceptionHandler = null)
         {
-            return Post<LookupModel>("lookup", movements, statusCodeHandlers, exceptionHandler);
+            return Post<LookupModel>("lookup", model, statusCodeHandlers, exceptionHandler);
         }
 
         private static TResponseData Get<TResponseData>(
