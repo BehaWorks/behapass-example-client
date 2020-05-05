@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using LoggerServer;
@@ -42,8 +43,8 @@ public sealed class RegistrationLogger : MonoBehaviourWithPrint
 
         SceneManager.MoveGameObjectToScene(config.gameObject, SceneManager.GetActiveScene());
 
-        _userName = config?.userName;
-        _userId = config?.userId;
+        _userName = config.userName;
+        _userId = config.userId;
 
         if (string.IsNullOrEmpty(_userName) || string.IsNullOrEmpty(_userId))
         {
@@ -111,5 +112,38 @@ public sealed class RegistrationLogger : MonoBehaviourWithPrint
             _finished ?
                 "Server has enough gestures, logging finished successfully." :
                 "Please send more gestures.");
+    }
+
+    public void Cancel()
+    {
+        var success = false;
+
+        var response = LoggerServerAPI.DeleteUserMovements(
+            _userId,
+            new Dictionary<HttpStatusCode, Func<bool>>
+            {
+                {
+                    HttpStatusCode.OK,
+                    () =>
+                    {
+                        success = true;
+                        return true;
+                    }
+                },
+                {
+                    HttpStatusCode.NotFound,
+                    () =>
+                    {
+                        success = false;
+                        return true;
+                    }
+                }
+            },
+            exception => Print(exception.Message, LogType.Error));
+
+        if (response != null)
+        {
+            Print(response.Message, success ? LogType.Log : LogType.Error);
+        }
     }
 }

@@ -38,6 +38,14 @@ namespace LoggerServer
             return Post<UserMovementsResponseModel>($"user/{userId}/movements", movements, statusCodeHandlers, exceptionHandler);
         }
 
+        public static UserMovementsResponseModel DeleteUserMovements(
+            string userId,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
+            Action<Exception> exceptionHandler = null)
+        {
+            return Delete<UserMovementsResponseModel>($"user/{userId}/movements", statusCodeHandlers, exceptionHandler);
+        }
+
         public static LookupModel Lookup(
             LoggerModel model,
             IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
@@ -66,6 +74,16 @@ namespace LoggerServer
             var request = new RestRequest(requestUrl, Method.POST, DataFormat.Json);
             var json = JsonConvert.SerializeObject(requestBody);
             request.AddParameter("application/json", json, ParameterType.RequestBody);
+            return Execute<TResponseData>(request, statusCodeHandlers, exceptionHandler);
+        }
+
+        private static TResponseData Delete<TResponseData>(
+            string requestUrl,
+            IReadOnlyDictionary<HttpStatusCode, Func<bool>> statusCodeHandlers = null,
+            Action<Exception> exceptionHandler = null)
+            where TResponseData : class, new()
+        {
+            var request = new RestRequest(requestUrl, Method.DELETE, DataFormat.Json);
             return Execute<TResponseData>(request, statusCodeHandlers, exceptionHandler);
         }
 
