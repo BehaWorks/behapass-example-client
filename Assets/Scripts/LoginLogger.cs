@@ -52,8 +52,10 @@ public sealed class LoginLogger : MonoBehaviourWithPrint
     {
         Print($"Gesture capturing finished.{Environment.NewLine}Sending gesture to server.");
 
+        var model = new LoggerModel { Movements = gestureToSend, Buttons = new List<ButtonModel>() };
+
         var response = LoggerServerAPI.Lookup(
-            gestureToSend,
+            model,
             new Dictionary<HttpStatusCode, Func<bool>>
             {
                 {

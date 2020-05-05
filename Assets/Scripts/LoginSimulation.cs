@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using LoggerServer;
 using LoggerServer.Models;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class LoginSimulation : MonoBehaviourWithPrint
 {
@@ -33,6 +37,7 @@ public class LoginSimulation : MonoBehaviourWithPrint
 
     private GameObject _holder;
     private TrailRenderer _trail;
+    private List<MovementModel> _allMovements;
     private List<MovementModel> _movements;
     private int _movementIndex;
     private float _partCurrentDurationInSeconds;
@@ -44,8 +49,7 @@ public class LoginSimulation : MonoBehaviourWithPrint
 
     private void Start()
     {
-        _currentUserIndex = Random.Range(0, _userNames.Length);
-        TryDownloadUserGestures(_userNames[_currentUserIndex]);
+        Repeat();
     }
 
     private void Update()
@@ -58,7 +62,8 @@ public class LoginSimulation : MonoBehaviourWithPrint
 
             if (_movements != null)
             {
-                _movements = _movements.Where(movement => movement.X != 0 || movement.Y != 0 || movement.Z != 0).ToList();
+                _allMovements = _movements.Where(movement => movement.X != 0 || movement.Y != 0 || movement.Z != 0).ToList();
+                _movements = _allMovements.Where(movement => movement.DeviceId != "hmd").ToList();
 
                 _holder = new GameObject("Simulations Bundle");
                 _holder.transform.parent = transform;
@@ -77,8 +82,8 @@ public class LoginSimulation : MonoBehaviourWithPrint
 
         if (_simulating && (_movements == null || _movementIndex >= _movements.Count - 2))
         {
+            TrySendToServer(_allMovements);
             Destroy(_holder);
-            ShowMenu($"Welcome {currentUserName}.");
             _simulating = false;
             _movementIndex = 0;
             return;
@@ -123,6 +128,39 @@ public class LoginSimulation : MonoBehaviourWithPrint
         }
     }
 
+    private void TrySendToServer(List<MovementModel> gestureToSend)
+    {
+        Print($"Gesture capturing finished.{Environment.NewLine}Sending gesture to server.");
+
+        var model = new LoggerModel { Movements = gestureToSend, Buttons = new List<ButtonModel>() };
+
+        var response = LoggerServerAPI.Lookup(
+            model,
+            new Dictionary<HttpStatusCode, Func<bool>>
+            {
+                {
+                    HttpStatusCode.OK,
+                    () => true
+                },
+                {
+                    HttpStatusCode.NotFound,
+                    () =>
+                    {
+                        ShowMenu("User not found.", false);
+                        return false;
+                    }
+                }
+            },
+            exception => Print(exception.Message, LogType.Error));
+
+        if (response == null)
+        {
+            return;
+        }
+
+        ShowMenu($"Welcome user with ID {response.UserId}.", true);
+    }
+
     private void TryDownloadUserGestures(string userName)
     {
         if (!_userGestures.ContainsKey(userName))
@@ -139,14 +177,17 @@ public class LoginSimulation : MonoBehaviourWithPrint
             Mathf.Lerp(-gestureScale / 2, gestureScale / 2, position.z / gestureScale / 2 + 0.5f));
     }
 
-    private void ShowMenu(string message)
+    private void ShowMenu(string message, bool success)
     {
-        messageHolder.text = message;
         menuHolder.gameObject.SetActive(true);
+        messageHolder.text = message;
+        continueButton.gameObject.SetActive(success);
     }
 
     public void Repeat()
     {
+        _currentUserIndex = Random.Range(0, _userNames.Length);
+        TryDownloadUserGestures(_userNames[_currentUserIndex]);
         _finished = true;
         menuHolder.gameObject.SetActive(false);
     }
@@ -156,10 +197,8 @@ public class LoginSimulation : MonoBehaviourWithPrint
         SceneManager.LoadScene("Registration Keyboard");
     }
 
-    public void NextUser()
+    public void Continue()
     {
-        _currentUserIndex = Random.Range(0, _userNames.Length);
-        TryDownloadUserGestures(_userNames[_currentUserIndex]);
-        Repeat();
+        ShowMenu("Not implemented yet!", false); // TODO
     }
 }
