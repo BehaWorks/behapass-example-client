@@ -116,34 +116,24 @@ public sealed class RegistrationLogger : MonoBehaviourWithPrint
 
     public void Cancel()
     {
-        var success = false;
-
         var response = LoggerServerAPI.DeleteUserMovements(
             _userId,
             new Dictionary<HttpStatusCode, Func<bool>>
             {
                 {
                     HttpStatusCode.OK,
-                    () =>
-                    {
-                        success = true;
-                        return true;
-                    }
+                    () => true
                 },
                 {
                     HttpStatusCode.NotFound,
-                    () =>
-                    {
-                        success = false;
-                        return true;
-                    }
+                    () => true
                 }
             },
             exception => Print(exception.Message, LogType.Error));
 
         if (response != null)
         {
-            Print(response.Message, success ? LogType.Log : LogType.Error);
+            SceneManager.LoadScene("Main Menu");
         }
     }
 }
